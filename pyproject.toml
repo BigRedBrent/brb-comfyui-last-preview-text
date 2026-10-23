@@ -1,6 +1,6 @@
 [project]
 name = "brb-comfyui-last-preview-text"
-version = "0.0.0"
+version = "1.0.0"
 description = "Shows the previous run's text alongside the current run's text."
 license = { file = "LICENSE" }
 
