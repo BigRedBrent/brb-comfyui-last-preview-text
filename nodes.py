@@ -182,6 +182,7 @@ class LastPreviewText:
     FUNCTION = "run"
     OUTPUT_NODE = True
     CATEGORY = "utils"
+    DESCRIPTION = "Shows the previous run's text alongside the current run's text."
 
     @classmethod
     def IS_CHANGED(cls, **kwargs):
