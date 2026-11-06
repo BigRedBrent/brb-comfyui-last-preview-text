@@ -1,6 +1,6 @@
 # Last Preview Text
 
-A ComfyUI node that shows the text from the previous run alongside the text from the current run, so you can compare them without digging through the queue history. Text can be shown as plain text or as Markdown.
+A ComfyUI node that shows the text from the previous run alongside the text from the current run, so you can compare them without digging through the queue history. Text can be shown as plain text, or as Markdown with the **markdown** toggle.
 
 It's useful for anything that changes from run to run, such as:
 

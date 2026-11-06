@@ -170,7 +170,12 @@ class LastPreviewText:
             "required": {
                 # Accepts any type; it's turned into text before it's shown
                 "text": ("*", {}),
-                "mode": (["Plain text", "Markdown"], {"default": "Plain text"}),
+                # Was a "mode" dropdown ("Plain text" or "Markdown") in 1.0.1; older workflows are converted
+                # when they load (see last_preview_text.js)
+                "markdown": ("BOOLEAN", {
+                    "default": False,
+                    "tooltip": "On: shows the text as Markdown. Off: shows it as plain text.",
+                }),
             },
             "hidden": {
                 "unique_id": "UNIQUE_ID",
@@ -189,7 +194,8 @@ class LastPreviewText:
         # Always run, so the display gets refreshed on every job
         return float("nan")
 
-    def run(self, text, mode, unique_id=None, extra_pnginfo=None):
+    def run(self, text, markdown=False, unique_id=None, extra_pnginfo=None, **kwargs):
+        # kwargs takes the old "mode" setting from jobs saved before it became the markdown toggle
         text = _to_text(text)
 
         # Tag the text with the workflow and node it came from, so the browser

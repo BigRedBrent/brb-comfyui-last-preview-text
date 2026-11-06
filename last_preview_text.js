@@ -22,11 +22,6 @@ const allNodes = new Set();
 // cleared whenever ComfyUI rebuilds the node (switching tabs, undo, and so on).
 const FIELDS = [
     {
-        name: "previous_preview_text",
-        textKey: "previous",
-        placeholder: "Shows the previous job's text once the next job starts…",
-    },
-    {
         name: "current_preview_text",
         textKey: "finished",
         placeholder: "Shows the previous job's text while jobs run, and the latest text once all jobs finish…",
@@ -35,6 +30,11 @@ const FIELDS = [
         name: "working_preview_text",
         textKey: "working",
         placeholder: "Shows this workflow's job text while its job runs, and clears when that job ends…",
+    },
+    {
+        name: "previous_preview_text",
+        textKey: "previous",
+        placeholder: "Shows the previous job's text once the next job starts…",
     },
     {
         name: "preview_text",
@@ -135,7 +135,17 @@ function getState(key) {
 }
 
 function isMarkdown(node) {
-    return node.widgets?.find((w) => w.name === "mode")?.value === "Markdown";
+    const value = node.widgets?.find((w) => w.name === "markdown")?.value;
+    return value === true || value === "Markdown";
+}
+
+// Workflows saved with 1.0.1 have the old "mode" dropdown's value, "Plain text" or "Markdown", where the
+// markdown toggle is now, so it's turned into on or off
+function convertOldMode(node) {
+    const widget = node.widgets?.find((w) => w.name === "markdown");
+    if (widget && typeof widget.value === "string") {
+        widget.value = widget.value === "Markdown";
+    }
 }
 
 // Renamed field labels are kept in the node's properties so they're saved with the workflow
@@ -181,7 +191,7 @@ function addTitleWidget(node, field) {
 
 // Builds the preview fields using ComfyUI's own widgets: a text box for plain
 // text, or the Markdown widget for Markdown. Each field keeps the same name in
-// both modes, so a favorite in the right panel follows the selected mode.
+// both modes, so a favorite in the right panel follows the markdown toggle.
 function buildPreviewWidgets(node) {
     const size = [...node.size];
     const markdown = isMarkdown(node);
@@ -391,8 +401,8 @@ app.registerExtension({
 
             allNodes.add(this);
 
-            // Rebuild the preview fields straight away when the mode is changed
-            const modeWidget = this.widgets?.find((w) => w.name === "mode");
+            // Rebuild the preview fields straight away when the markdown toggle is changed
+            const modeWidget = this.widgets?.find((w) => w.name === "markdown");
             if (modeWidget) {
                 const callback = modeWidget.callback;
                 modeWidget.callback = (...args) => {
@@ -408,11 +418,12 @@ app.registerExtension({
         };
 
         // When a workflow loads or its tab is switched back to, match the fields
-        // to the saved mode and labels, and to this session's text for the node
+        // to the saved markdown toggle and labels, and to this session's text for the node
         const onConfigure = nodeType.prototype.onConfigure;
         nodeType.prototype.onConfigure = function () {
             const result = onConfigure?.apply(this, arguments);
             allNodes.add(this);
+            convertOldMode(this);
             buildPreviewWidgets(this);
             return result;
         };
